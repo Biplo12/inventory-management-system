@@ -7,8 +7,7 @@
     "outDir": "./dist",
     "baseUrl": "./",
     "paths": {
-      "@commands/*": ["src/services/*"],
-      "@queries/*": ["src/utils/*"]
+      "@/*": ["src/*"]
     }
   }
 }

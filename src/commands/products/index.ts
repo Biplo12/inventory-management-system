@@ -2,24 +2,29 @@ import db from "src/db";
 import { Request, Response } from "express";
 import { Product } from "src/interfaces/Database";
 import { v4 as uuidv4 } from "uuid";
+import { generateTimestamps } from "@/utils";
+import { validateProduct } from "@/validations/products";
 
 export const createProduct = async (
-  res: Response,
-  req: Request
-): Promise<Product> => {
+  req: Request,
+  res: Response
+): Promise<void> => {
   try {
     await db.read();
 
     const product = req.body;
 
+    const error = validateProduct(product);
+
+    if (error) {
+      res.status(400).send({ message: error.message });
+      return;
+    }
+
     const newProduct: Product = {
       id: uuidv4(),
-      name: product.name,
-      description: product.description,
-      price: product.price,
-      stock: product.stock,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      ...product,
+      ...generateTimestamps(),
     };
 
     const isProductExists = db.data.products.find(
@@ -34,7 +39,9 @@ export const createProduct = async (
     db.data.products.push(newProduct);
     await db.write();
 
-    return newProduct;
+    res
+      .status(201)
+      .send({ id: newProduct.id, message: "Product created successfully" });
   } catch (error) {
     res.status(500).send({ message: "Failed to create product" });
     return;
