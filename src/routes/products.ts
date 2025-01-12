@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createProduct } from "src/commands/products";
+import { createProduct } from "@/commands/products";
 
 const router = Router();
 

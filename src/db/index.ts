@@ -1,7 +1,7 @@
 import { Low } from "lowdb";
 import { JSONFile } from "lowdb/node";
+import { Database } from "@/interfaces/Database";
 import path from "path";
-import { Database } from "src/interfaces/Database";
 
 const DEFAULT_DB_DATA: Database = {
   orders: [],
