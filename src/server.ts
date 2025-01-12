@@ -8,7 +8,7 @@ dotenv.config();
 const PORT = process.env.PORT || 5000;
 const PREFIX = "/api";
 
-const app = express();
+export const app = express();
 
 app.use(bodyParser.json());
 
