@@ -1,5 +1,5 @@
 import { createProductSchema } from "./schema";
-import { Product } from "@/interfaces/Database";
+import { Product } from "@prisma/client";
 import Joi from "joi";
 
 export const validateProduct = (
