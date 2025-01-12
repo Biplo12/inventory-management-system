@@ -37,6 +37,7 @@ export const createProduct = async (
     }
 
     db.data.products.push(newProduct);
+
     await db.write();
 
     res
