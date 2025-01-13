@@ -1,22 +1,27 @@
 import prisma from "@/db";
 import { validateProduct } from "@/validations/products";
-import { idSchema, nameSchema } from "@/validations/products/schema";
-import { Request, Response } from "express";
+import { idSchema } from "@/validations/products/schema";
+import { NextFunction, Request, Response } from "express";
 
-export const getProducts = async (req: Request, res: Response) => {
+export const getProducts = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
     const products = await prisma.product.findMany();
 
     res.status(200).send(products);
   } catch (error) {
-    res
-      .status(500)
-      .send({ message: error.message || "Failed to get products" });
-    return;
+    next(error);
   }
 };
 
-export const getProductById = async (req: Request, res: Response) => {
+export const getProductById = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
     const { id } = req.params;
 
@@ -41,7 +46,6 @@ export const getProductById = async (req: Request, res: Response) => {
 
     res.status(200).send(product);
   } catch (error) {
-    res.status(500).send({ message: error.message || "Failed to get product" });
-    return;
+    next(error);
   }
 };

@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { v4 as uuidv4 } from "uuid";
 import { generateTimestamps } from "@/utils";
 import { validateProduct } from "@/validations/products";
@@ -12,7 +12,8 @@ import {
 
 export const createProduct = async (
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction
 ): Promise<void> => {
   try {
     const product = req.body;
@@ -63,16 +64,14 @@ export const createProduct = async (
       .status(201)
       .send({ id: newProduct.id, message: "Product created successfully" });
   } catch (error) {
-    res
-      .status(500)
-      .send({ message: error.message || "Failed to create product" });
-    return;
+    next(error);
   }
 };
 
 export const deleteProduct = async (
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction
 ): Promise<void> => {
   try {
     const { id } = req.params;
@@ -108,16 +107,14 @@ export const deleteProduct = async (
 
     res.status(200).send({ message: "Product deleted successfully" });
   } catch (error) {
-    res
-      .status(500)
-      .send({ message: error.message || "Failed to delete product" });
-    return;
+    next(error);
   }
 };
 
 export const updateProduct = async (
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction
 ): Promise<void> => {
   try {
     const { id } = req.params;
@@ -191,9 +188,6 @@ export const updateProduct = async (
 
     res.status(200).send({ message: "Product updated successfully" });
   } catch (error) {
-    res
-      .status(500)
-      .send({ message: error.message || "Failed to update product" });
-    return;
+    next(error);
   }
 };

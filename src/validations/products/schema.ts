@@ -9,8 +9,6 @@ export const createProductSchema = joi.object({
 
 export const idSchema = joi.string().required().strict();
 
-export const nameSchema = joi.string().required().max(50).strict();
-
 export const updateProductSchema = joi.object({
   name: joi.string().max(50).strict(),
   description: joi.string().max(50).strict(),
