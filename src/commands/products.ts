@@ -9,6 +9,7 @@ import {
   idSchema,
   stockSchema,
   updateProductSchema,
+  quantitySchema,
 } from "@/validations/products/schema";
 
 export const createProduct = async (
@@ -77,11 +78,6 @@ export const deleteProduct = async (
   try {
     const { id } = req.params;
 
-    if (!id) {
-      res.status(400).send({ message: "Invalid product id" });
-      return;
-    }
-
     const idValidationError = validateProduct(id, idSchema);
 
     if (idValidationError) {
@@ -119,11 +115,6 @@ export const updateProduct = async (
 ): Promise<void> => {
   try {
     const { id } = req.params;
-
-    if (!id) {
-      res.status(400).send({ message: "Invalid product id" });
-      return;
-    }
 
     const idValidationError = validateProduct(id, idSchema);
 
@@ -202,11 +193,6 @@ export const restockProduct = async (
     const { id } = req.params;
     const { stock } = req.body;
 
-    if (!id) {
-      res.status(400).send({ message: "Invalid product id" });
-      return;
-    }
-
     const idValidationError = validateProduct(id, idSchema);
 
     if (idValidationError) {
@@ -240,6 +226,58 @@ export const restockProduct = async (
 
     res.status(200).send({
       message: "Product restocked successfully",
+      stock: updatedProduct.stock,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const sellProduct = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const { quantity } = req.body;
+
+    const idValidationError = validateProduct(id, idSchema);
+    if (idValidationError) {
+      res.status(400).send({ message: idValidationError.message });
+      return;
+    }
+
+    const quantityValidationError = validateProduct(quantity, quantitySchema);
+    if (quantityValidationError) {
+      res.status(400).send({ message: quantityValidationError.message });
+      return;
+    }
+
+    const product = await prisma.product.findUnique({
+      where: { id },
+    });
+
+    if (!product) {
+      res.status(404).send({ message: "Product not found" });
+      return;
+    }
+
+    if (product.stock < quantity) {
+      res.status(400).send({ message: "Insufficient stock" });
+      return;
+    }
+
+    const updatedProduct = await prisma.product.update({
+      where: { id },
+      data: {
+        stock: product.stock - quantity,
+        updatedAt: new Date(),
+      },
+    });
+
+    res.status(200).send({
+      message: "Product sold successfully",
       stock: updatedProduct.stock,
     });
   } catch (error) {

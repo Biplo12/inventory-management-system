@@ -25,11 +25,6 @@ export const getProductById = async (
   try {
     const { id } = req.params;
 
-    if (!id) {
-      res.status(400).send({ message: "Invalid product id" });
-      return;
-    }
-
     const idValidationError = validateProduct(id, idSchema);
 
     if (idValidationError) {
