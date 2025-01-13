@@ -102,7 +102,7 @@ export const deleteProduct = async (
       },
     });
 
-    res.status(200).send({ message: "Product deleted successfully" });
+    res.status(204).send({ message: "Product deleted successfully" });
   } catch (error) {
     next(error);
   }
