@@ -1,6 +1,7 @@
 import request from "supertest";
 import app from "@/app";
 import { findAndDeleteAllProducts } from "@/tests/utils";
+import { v4 as uuidv4 } from "uuid";
 
 beforeEach(async () => {
   await findAndDeleteAllProducts();
@@ -138,6 +139,42 @@ test("Update product stock by id successfully", async () => {
   });
 });
 
+test("Update multiple product fields by id successfully", async () => {
+  const createdProduct = await request(app).post("/api/products").send({
+    name: "Test Product",
+    description: "Test Description",
+    price: 100,
+    stock: 10,
+  });
+
+  const response = await request(app)
+    .put(`/api/products/${createdProduct.body.id}`)
+    .send({
+      name: "Updated Product",
+      description: "Updated Description",
+      price: 200,
+      stock: 20,
+    });
+
+  const product = await request(app).get(
+    `/api/products/${createdProduct.body.id}`
+  );
+
+  expect(product.status).toBe(200);
+  expect(product.body).toMatchObject({
+    id: createdProduct.body.id,
+    name: "Updated Product",
+    description: "Updated Description",
+    price: 200,
+    stock: 20,
+  });
+
+  expect(response.status).toBe(200);
+  expect(response.body).toEqual({
+    message: "Product updated successfully",
+  });
+});
+
 test("Update product name by id with product name already exists", async () => {
   const createdProduct = await request(app).post("/api/products").send({
     name: "Test Product",
@@ -218,8 +255,8 @@ test("Update product stock by id with no changes to update", async () => {
   });
 });
 
-test("Update product name by id with invalid product id", async () => {
-  const response = await request(app).put("/api/products/1").send({
+test("Update product name by id with product that does not exist", async () => {
+  const response = await request(app).put(`/api/products/${uuidv4()}`).send({
     name: "Updated Product",
   });
 
@@ -229,8 +266,19 @@ test("Update product name by id with invalid product id", async () => {
   });
 });
 
+test("Update product name by id with invalid id", async () => {
+  const response = await request(app).put("/api/products/invalid-id").send({
+    name: "Updated Product",
+  });
+
+  expect(response.status).toBe(400);
+  expect(response.body).toEqual({
+    message: "Invalid id",
+  });
+});
+
 test("Update product name by id with empty product name", async () => {
-  const response = await request(app).put("/api/products/1").send({
+  const response = await request(app).put(`/api/products/${uuidv4()}`).send({
     name: "",
   });
 
@@ -241,7 +289,7 @@ test("Update product name by id with empty product name", async () => {
 });
 
 test("Update product name by id with empty product description", async () => {
-  const response = await request(app).put("/api/products/1").send({
+  const response = await request(app).put(`/api/products/${uuidv4()}`).send({
     description: "",
   });
 
@@ -252,7 +300,7 @@ test("Update product name by id with empty product description", async () => {
 });
 
 test("Update product name by id with invalid name type", async () => {
-  const response = await request(app).put("/api/products/1").send({
+  const response = await request(app).put(`/api/products/${uuidv4()}`).send({
     name: 1,
   });
 
@@ -263,7 +311,7 @@ test("Update product name by id with invalid name type", async () => {
 });
 
 test("Update product name by id with invalid description type", async () => {
-  const response = await request(app).put("/api/products/1").send({
+  const response = await request(app).put(`/api/products/${uuidv4()}`).send({
     description: 1,
   });
 
@@ -274,7 +322,7 @@ test("Update product name by id with invalid description type", async () => {
 });
 
 test("Update product name by id with invalid price type", async () => {
-  const response = await request(app).put("/api/products/1").send({
+  const response = await request(app).put(`/api/products/${uuidv4()}`).send({
     price: "1",
   });
 
@@ -285,7 +333,7 @@ test("Update product name by id with invalid price type", async () => {
 });
 
 test("Update product name by id with invalid stock type", async () => {
-  const response = await request(app).put("/api/products/1").send({
+  const response = await request(app).put(`/api/products/${uuidv4()}`).send({
     stock: "1",
   });
 
@@ -296,7 +344,7 @@ test("Update product name by id with invalid stock type", async () => {
 });
 
 test("Update product name by id with invalid product price", async () => {
-  const response = await request(app).put("/api/products/1").send({
+  const response = await request(app).put(`/api/products/${uuidv4()}`).send({
     price: -1,
   });
 
@@ -307,7 +355,7 @@ test("Update product name by id with invalid product price", async () => {
 });
 
 test("Update product name by id with invalid product stock", async () => {
-  const response = await request(app).put("/api/products/1").send({
+  const response = await request(app).put(`/api/products/${uuidv4()}`).send({
     stock: -1,
   });
 
@@ -319,7 +367,7 @@ test("Update product name by id with invalid product stock", async () => {
 
 test("Update product name by id with invalid product name length", async () => {
   const response = await request(app)
-    .put("/api/products/1")
+    .put(`/api/products/${uuidv4()}`)
     .send({
       name: "Test Product".repeat(10),
     });
@@ -332,7 +380,7 @@ test("Update product name by id with invalid product name length", async () => {
 
 test("Update product name by id with crossed description length limit", async () => {
   const response = await request(app)
-    .put("/api/products/1")
+    .put(`/api/products/${uuidv4()}`)
     .send({
       description: "Test Description".repeat(10),
     });

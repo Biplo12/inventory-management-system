@@ -7,7 +7,10 @@ export const createProductSchema = joi.object({
   stock: joi.number().integer().required().min(0).strict(),
 });
 
-export const idSchema = joi.string().required().strict();
+export const idSchema = joi.string().guid().required().strict().messages({
+  "string.guid": "Invalid id",
+});
+
 export const stockSchema = joi
   .number()
   .integer()

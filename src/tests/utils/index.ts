@@ -14,6 +14,10 @@ export const findAndDeleteAllProducts = async () => {
     where: { name: "Updated Product" },
   });
 
+  const productsWithSecondName = await prisma.product.findMany({
+    where: { name: "Second Product" },
+  });
+
   if (productsWithTestName.length > 0) {
     await prisma.product.deleteMany({ where: { name: "Test Product" } });
   }
@@ -21,6 +25,12 @@ export const findAndDeleteAllProducts = async () => {
   if (productsWithUpdatedName.length > 0) {
     await prisma.product.deleteMany({
       where: { name: "Updated Product" },
+    });
+  }
+
+  if (productsWithSecondName.length > 0) {
+    await prisma.product.deleteMany({
+      where: { name: "Second Product" },
     });
   }
 };

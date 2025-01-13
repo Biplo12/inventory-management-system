@@ -1,7 +1,7 @@
 import request from "supertest";
 import app from "@/app";
 import { findAndDeleteAllProducts } from "@/tests/utils";
-
+import { v4 as uuidv4 } from "uuid";
 beforeEach(async () => {
   await findAndDeleteAllProducts();
 });
@@ -24,11 +24,20 @@ test("Delete product successfully", async () => {
   });
 });
 
-test("Delete product with invalid id", async () => {
-  const response = await request(app).delete("/api/products/invalid-id").send();
+test("Delete product that does not exist", async () => {
+  const response = await request(app).delete(`/api/products/${uuidv4()}`);
 
   expect(response.status).toBe(404);
   expect(response.body).toEqual({
     message: "Product not found",
+  });
+});
+
+test("Delete product with invalid id", async () => {
+  const response = await request(app).delete("/api/products/invalid-id");
+
+  expect(response.status).toBe(400);
+  expect(response.body).toEqual({
+    message: "Invalid id",
   });
 });

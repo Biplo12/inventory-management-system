@@ -1,6 +1,7 @@
 import request from "supertest";
 import app from "@/app";
 import { findAndDeleteAllProducts } from "@/tests/utils";
+import { v4 as uuidv4 } from "uuid";
 
 beforeEach(async () => {
   await findAndDeleteAllProducts();
@@ -68,13 +69,28 @@ test("Sell product with insufficient stock", async () => {
 });
 
 test("Sell product with non-existent product id", async () => {
-  const response = await request(app).post("/api/products/123/sell").send({
-    quantity: 5,
-  });
+  const response = await request(app)
+    .post(`/api/products/${uuidv4()}/sell`)
+    .send({
+      quantity: 5,
+    });
 
   expect(response.status).toBe(404);
   expect(response.body).toEqual({
     message: "Product not found",
+  });
+});
+
+test("Sell product with invalid id", async () => {
+  const response = await request(app)
+    .post("/api/products/invalid-id/sell")
+    .send({
+      quantity: 5,
+    });
+
+  expect(response.status).toBe(400);
+  expect(response.body).toEqual({
+    message: "Invalid id",
   });
 });
 
