@@ -60,7 +60,7 @@ export const deleteProduct = async (
   res: Response
 ): Promise<void> => {
   try {
-    const { id } = req.body;
+    const { id } = req.params;
 
     const error = validateProduct(id, deleteProductSchema);
 

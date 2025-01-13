@@ -16,9 +16,7 @@ test("Create product successfully", async () => {
     message: "Product created successfully",
   });
 
-  await request(app).delete("/api/products").send({
-    id: response.body.id,
-  });
+  await request(app).delete(`/api/products/${response.body.id}`).send();
 });
 
 test("Create product with missing fields", async () => {
@@ -56,9 +54,7 @@ test("Create product with existing name", async () => {
     message: "Product already exists",
   });
 
-  await request(app).delete("/api/products").send({
-    id: createdProduct.body.id,
-  });
+  await request(app).delete(`/api/products/${createdProduct.body.id}`).send();
 });
 
 test("Create product with crossed name length limit", async () => {

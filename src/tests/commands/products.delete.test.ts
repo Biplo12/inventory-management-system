@@ -9,59 +9,27 @@ test("Delete product successfully", async () => {
     stock: 10,
   });
 
-  const response = await request(app).delete("/api/products").send({
-    id: createdProduct.body.id,
-  });
+  const response = await request(app)
+    .delete(`/api/products/${createdProduct.body.id}`)
+    .send();
 
   expect(response.status).toBe(200);
-
   expect(response.body).toEqual({
     message: "Product deleted successfully",
   });
 });
 
 test("Delete product with invalid id", async () => {
-  const response = await request(app).delete("/api/products").send({
-    id: "invalid-id",
-  });
+  const response = await request(app).delete("/api/products/invalid-id").send();
 
   expect(response.status).toBe(400);
-
   expect(response.body).toEqual({
     message: "Product not found",
   });
 });
 
-test("Delete product with invalid id type", async () => {
-  const response = await request(app).delete("/api/products").send({
-    id: 1,
-  });
-
-  expect(response.status).toBe(400);
-
-  expect(response.body).toEqual({
-    message: "Value must be a string",
-  });
-});
-
 test("Delete product without id", async () => {
-  const response = await request(app).delete("/api/products").send({});
+  const response = await request(app).delete("/api/products/").send();
 
-  expect(response.status).toBe(400);
-
-  expect(response.body).toEqual({
-    message: "Value is required",
-  });
-});
-
-test("Delete product with empty id", async () => {
-  const response = await request(app).delete("/api/products").send({
-    id: "",
-  });
-
-  expect(response.status).toBe(400);
-
-  expect(response.body).toEqual({
-    message: "Value must be a string",
-  });
+  expect(response.status).toBe(404);
 });
