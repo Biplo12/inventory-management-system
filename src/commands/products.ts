@@ -7,6 +7,7 @@ import prisma from "@/db";
 import {
   createProductSchema,
   idSchema,
+  stockSchema,
   updateProductSchema,
 } from "@/validations/products/schema";
 
@@ -187,6 +188,60 @@ export const updateProduct = async (
     });
 
     res.status(200).send({ message: "Product updated successfully" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const restockProduct = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const { stock } = req.body;
+
+    if (!id) {
+      res.status(400).send({ message: "Invalid product id" });
+      return;
+    }
+
+    const idValidationError = validateProduct(id, idSchema);
+
+    if (idValidationError) {
+      res.status(400).send({ message: idValidationError.message });
+      return;
+    }
+
+    const stockValidationError = validateProduct(stock, stockSchema);
+
+    if (stockValidationError) {
+      res.status(400).send({ message: stockValidationError.message });
+      return;
+    }
+
+    const product = await prisma.product.findUnique({
+      where: { id },
+    });
+
+    if (!product) {
+      res.status(404).send({ message: "Product not found" });
+      return;
+    }
+
+    const updatedProduct = await prisma.product.update({
+      where: { id },
+      data: {
+        stock: product.stock + stock,
+        updatedAt: new Date(),
+      },
+    });
+
+    res.status(200).send({
+      message: "Product restocked successfully",
+      stock: updatedProduct.stock,
+    });
   } catch (error) {
     next(error);
   }

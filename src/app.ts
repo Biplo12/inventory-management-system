@@ -8,7 +8,7 @@ dotenv.config();
 
 const PREFIX = "/api";
 
-export const app = express();
+const app = express();
 
 app.use(bodyParser.json());
 
