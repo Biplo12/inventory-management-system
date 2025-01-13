@@ -40,6 +40,24 @@ test("Update product name by id successfully", async () => {
   });
 });
 
+test("Update product with empty object", async () => {
+  const createdProduct = await request(app).post("/api/products").send({
+    name: "Test Product",
+    description: "Test Description",
+    price: 100,
+    stock: 10,
+  });
+
+  const response = await request(app)
+    .put(`/api/products/${createdProduct.body.id}`)
+    .send({});
+
+  expect(response.status).toBe(400);
+  expect(response.body).toEqual({
+    message: "No changes to update",
+  });
+});
+
 test("Update product description by id successfully", async () => {
   const createdProduct = await request(app).post("/api/products").send({
     name: "Test Product",

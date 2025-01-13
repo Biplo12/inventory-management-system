@@ -147,3 +147,21 @@ test("Sell product without quantity", async () => {
     message: "Quantity is required",
   });
 });
+
+test("Sell product with decimal quantity", async () => {
+  const createdProduct = await request(app).post("/api/products").send({
+    name: "Test Product",
+    description: "Test Description",
+    price: 100,
+    stock: 10,
+  });
+
+  const response = await request(app)
+    .post(`/api/products/${createdProduct.body.id}/sell`)
+    .send({ quantity: 5.5 });
+
+  expect(response.status).toBe(400);
+  expect(response.body).toEqual({
+    message: "Quantity must be an integer",
+  });
+});

@@ -110,3 +110,21 @@ test("Restock product without stock", async () => {
     message: "Stock is required",
   });
 });
+
+test("Restock product with decimal stock", async () => {
+  const createdProduct = await request(app).post("/api/products").send({
+    name: "Test Product",
+    description: "Test Description",
+    price: 100,
+    stock: 10,
+  });
+
+  const response = await request(app)
+    .post(`/api/products/${createdProduct.body.id}/restock`)
+    .send({ stock: 10.5 });
+
+  expect(response.status).toBe(400);
+  expect(response.body).toEqual({
+    message: "Stock must be an integer",
+  });
+});
