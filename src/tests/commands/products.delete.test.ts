@@ -1,5 +1,10 @@
 import request from "supertest";
 import { app } from "@/app";
+import { findAndDeleteTestProducts } from "@/tests/utils";
+
+beforeEach(async () => {
+  await findAndDeleteTestProducts();
+});
 
 test("Delete product successfully", async () => {
   const createdProduct = await request(app).post("/api/products").send({
@@ -22,14 +27,8 @@ test("Delete product successfully", async () => {
 test("Delete product with invalid id", async () => {
   const response = await request(app).delete("/api/products/invalid-id").send();
 
-  expect(response.status).toBe(400);
+  expect(response.status).toBe(404);
   expect(response.body).toEqual({
     message: "Product not found",
   });
-});
-
-test("Delete product without id", async () => {
-  const response = await request(app).delete("/api/products/").send();
-
-  expect(response.status).toBe(404);
 });

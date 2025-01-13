@@ -1,5 +1,10 @@
 import request from "supertest";
 import { app } from "@/app";
+import { findAndDeleteTestProducts } from "@/tests/utils";
+
+beforeEach(async () => {
+  await findAndDeleteTestProducts();
+});
 
 test("Create product successfully", async () => {
   const response = await request(app).post("/api/products").send({
@@ -15,8 +20,6 @@ test("Create product successfully", async () => {
     id: expect.any(String),
     message: "Product created successfully",
   });
-
-  await request(app).delete(`/api/products/${response.body.id}`).send();
 });
 
 test("Create product with missing fields", async () => {
@@ -34,7 +37,7 @@ test("Create product with missing fields", async () => {
 });
 
 test("Create product with existing name", async () => {
-  const createdProduct = await request(app).post("/api/products").send({
+  await request(app).post("/api/products").send({
     name: "Test Product",
     description: "Test Description",
     price: 100,
@@ -53,8 +56,6 @@ test("Create product with existing name", async () => {
   expect(response.body).toEqual({
     message: "Product already exists",
   });
-
-  await request(app).delete(`/api/products/${createdProduct.body.id}`).send();
 });
 
 test("Create product with crossed name length limit", async () => {

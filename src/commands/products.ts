@@ -6,7 +6,8 @@ import { Product } from "@prisma/client";
 import prisma from "@/db";
 import {
   createProductSchema,
-  deleteProductSchema,
+  idSchema,
+  updateProductSchema,
 } from "@/validations/products/schema";
 
 export const createProduct = async (
@@ -16,10 +17,13 @@ export const createProduct = async (
   try {
     const product = req.body;
 
-    const error = validateProduct(product, createProductSchema);
+    const productValidationError = validateProduct(
+      product,
+      createProductSchema
+    );
 
-    if (error) {
-      res.status(400).send({ message: error.message });
+    if (productValidationError) {
+      res.status(400).send({ message: productValidationError.message });
       return;
     }
 
@@ -37,6 +41,17 @@ export const createProduct = async (
 
     if (isProductExists) {
       res.status(400).send({ message: "Product already exists" });
+      return;
+    }
+
+    const isProductNameExists = await prisma.product.findFirst({
+      where: {
+        name: product.name,
+      },
+    });
+
+    if (isProductNameExists) {
+      res.status(400).send({ message: "Product name already exists" });
       return;
     }
 
@@ -62,10 +77,15 @@ export const deleteProduct = async (
   try {
     const { id } = req.params;
 
-    const error = validateProduct(id, deleteProductSchema);
+    if (!id) {
+      res.status(400).send({ message: "Invalid product id" });
+      return;
+    }
 
-    if (error) {
-      res.status(400).send({ message: error.message });
+    const idValidationError = validateProduct(id, idSchema);
+
+    if (idValidationError) {
+      res.status(400).send({ message: idValidationError.message });
       return;
     }
 
@@ -76,7 +96,7 @@ export const deleteProduct = async (
     });
 
     if (!isProductExists) {
-      res.status(400).send({ message: "Product not found" });
+      res.status(404).send({ message: "Product not found" });
       return;
     }
 
@@ -91,6 +111,89 @@ export const deleteProduct = async (
     res
       .status(500)
       .send({ message: error.message || "Failed to delete product" });
+    return;
+  }
+};
+
+export const updateProduct = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      res.status(400).send({ message: "Invalid product id" });
+      return;
+    }
+
+    const idValidationError = validateProduct(id, idSchema);
+
+    if (idValidationError) {
+      res.status(400).send({ message: idValidationError.message });
+      return;
+    }
+
+    const product = req.body;
+
+    const productValidationError = validateProduct(
+      product,
+      updateProductSchema
+    );
+
+    if (productValidationError) {
+      res.status(400).send({ message: productValidationError.message });
+      return;
+    }
+
+    const isProductExists = await prisma.product.findFirst({
+      where: {
+        id,
+      },
+    });
+
+    if (!isProductExists) {
+      res.status(404).send({ message: "Product not found" });
+      return;
+    }
+
+    if (product?.name) {
+      const isProductNameExists = await prisma.product.findFirst({
+        where: {
+          name: product.name,
+        },
+      });
+
+      if (isProductNameExists) {
+        res.status(400).send({ message: "Product name already exists" });
+        return;
+      }
+    }
+
+    const isUpdatedValuesSame = Object.keys(product).every(
+      (key) => isProductExists[key] === product[key]
+    );
+
+    if (isUpdatedValuesSame) {
+      res.status(400).send({ message: "No changes to update" });
+      return;
+    }
+
+    await prisma.product.update({
+      where: {
+        id,
+      },
+      data: {
+        ...product,
+        updatedAt: new Date(),
+      },
+    });
+
+    res.status(200).send({ message: "Product updated successfully" });
+  } catch (error) {
+    res
+      .status(500)
+      .send({ message: error.message || "Failed to update product" });
     return;
   }
 };
