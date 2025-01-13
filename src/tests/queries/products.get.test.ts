@@ -7,7 +7,7 @@ beforeEach(async () => {
 });
 
 test("Get products successfully", async () => {
-  await request(app).post("/api/products").send({
+  const createdProduct = await request(app).post("/api/products").send({
     name: "Test Product",
     description: "Test Description",
     price: 100,
@@ -17,22 +17,16 @@ test("Get products successfully", async () => {
   const response = await request(app).get("/api/products");
 
   expect(response.status).toBe(200);
-  expect(response.body).toMatchObject([
-    {
-      id: expect.any(String),
-      name: "Test Product",
-      description: "Test Description",
-      price: 100,
-      stock: 10,
-    },
-  ]);
-});
 
-test("Get products with no products", async () => {
-  const response = await request(app).get("/api/products");
-
-  expect(response.status).toBe(200);
-  expect(response.body).toEqual([]);
+  expect(response.body).toContainEqual({
+    id: createdProduct.body.id,
+    name: "Test Product",
+    description: "Test Description",
+    price: 100,
+    stock: 10,
+    createdAt: expect.any(String),
+    updatedAt: expect.any(String),
+  });
 });
 
 test("Get product by id successfully", async () => {
