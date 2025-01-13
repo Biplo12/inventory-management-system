@@ -21,7 +21,7 @@
     "build": "tsc --project tsconfig.json && tsc-alias -p tsconfig.json",
     "start": "node dist/server.js",
     "dev": "nodemon -r tsconfig-paths/register src/server.ts",
-    "test": "jest"
+    "test": "jest --coverage --detectOpenHandles"
   },
   "devDependencies": {
     "@types/express": "^5.0.0",

@@ -1,11 +1,10 @@
-import { createProductSchema } from "./schema";
-import { Product } from "@prisma/client";
 import Joi from "joi";
 
 export const validateProduct = (
-  product: Product
+  validationData: any,
+  schema: Joi.Schema
 ): Joi.ValidationError | undefined => {
-  const { error } = createProductSchema.validate(product);
+  const { error } = schema.validate(validationData);
   const formattedMessage = error?.message
     .replace(/"/g, "")
     .replace(/\b\w/, (char) => char.toUpperCase());
@@ -16,4 +15,6 @@ export const validateProduct = (
       message: formattedMessage,
     };
   }
+
+  return undefined;
 };

@@ -1,5 +1,5 @@
 import request from "supertest";
-import { app } from "@/server";
+import { app } from "@/app";
 
 test("Create product successfully", async () => {
   const response = await request(app).post("/api/products").send({
@@ -14,6 +14,10 @@ test("Create product successfully", async () => {
   expect(response.body).toEqual({
     id: expect.any(String),
     message: "Product created successfully",
+  });
+
+  await request(app).delete("/api/products").send({
+    id: response.body.id,
   });
 });
 
@@ -32,14 +36,14 @@ test("Create product with missing fields", async () => {
 });
 
 test("Create product with existing name", async () => {
-  const response = await request(app).post("/api/products").send({
+  const createdProduct = await request(app).post("/api/products").send({
     name: "Test Product",
     description: "Test Description",
     price: 100,
     stock: 10,
   });
 
-  await request(app).post("/api/products").send({
+  const response = await request(app).post("/api/products").send({
     name: "Test Product",
     description: "Test Description",
     price: 100,
@@ -50,6 +54,10 @@ test("Create product with existing name", async () => {
 
   expect(response.body).toEqual({
     message: "Product already exists",
+  });
+
+  await request(app).delete("/api/products").send({
+    id: createdProduct.body.id,
   });
 });
 
