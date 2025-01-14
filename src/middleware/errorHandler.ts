@@ -11,8 +11,8 @@ const errorHandler = (
   res: Response,
   next: NextFunction
 ): void => {
-  //   console.error(`Error: ${err.message}`);
-  //   console.error(`Stack: ${err.stack}`);
+  console.error(`Error: ${err.message}`);
+  console.error(`Stack: ${err.stack}`);
 
   const statusCode = err.statusCode || 500;
   const message = err.customMessage || "An unexpected error occurred";

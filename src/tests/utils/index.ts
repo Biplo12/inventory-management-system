@@ -1,36 +1,54 @@
 import prisma from "@/db";
 import { IS_TEST } from "@/constants/env";
 
-export const findAndDeleteAllProducts = async () => {
+export const findAndDeleteAllTestProducts = async () => {
   if (!IS_TEST) {
     throw new Error("❌ Cannot delete products in non-test environment");
   }
 
-  const productsWithTestName = await prisma.product.findMany({
-    where: { name: "Test Product" },
-  });
+  const productNames = ["Test Product", "Updated Product", "Second Product"];
 
-  const productsWithUpdatedName = await prisma.product.findMany({
-    where: { name: "Updated Product" },
-  });
-
-  const productsWithSecondName = await prisma.product.findMany({
-    where: { name: "Second Product" },
-  });
-
-  if (productsWithTestName.length > 0) {
-    await prisma.product.deleteMany({ where: { name: "Test Product" } });
-  }
-
-  if (productsWithUpdatedName.length > 0) {
-    await prisma.product.deleteMany({
-      where: { name: "Updated Product" },
+  for (const name of productNames) {
+    const products = await prisma.product.findMany({
+      where: { name },
     });
+
+    if (products.length > 0) {
+      await prisma.orderItem.deleteMany({
+        where: {
+          product: {
+            name,
+          },
+        },
+      });
+
+      await prisma.product.deleteMany({
+        where: { name },
+      });
+    }
+  }
+};
+
+export const findAndDeleteAllTestOrders = async () => {
+  if (!IS_TEST) {
+    throw new Error("❌ Cannot delete orders in non-test environment");
   }
 
-  if (productsWithSecondName.length > 0) {
-    await prisma.product.deleteMany({
-      where: { name: "Second Product" },
+  const ordersWithTestProduct = await prisma.order.findMany({
+    where: { orderItems: { some: { product: { name: "Test Product" } } } },
+  });
+
+  if (ordersWithTestProduct.length > 0) {
+    await prisma.order.deleteMany({
+      where: {
+        orderItems: {
+          some: {
+            product: {
+              name: "Test Product",
+            },
+          },
+        },
+      },
     });
   }
 };

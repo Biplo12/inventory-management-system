@@ -1,9 +1,10 @@
 import request from "supertest";
 import app from "@/app";
-import { findAndDeleteAllProducts } from "@/tests/utils";
-import { v4 as uuidv4 } from "uuid";
+import { findAndDeleteAllTestProducts } from "@/tests/utils";
+import { generateObjectId } from "@/utils";
+
 beforeEach(async () => {
-  await findAndDeleteAllProducts();
+  await findAndDeleteAllTestProducts();
 });
 
 test("Restock product successfully", async () => {
@@ -68,7 +69,7 @@ test("Restock product with invalid stock", async () => {
 
 test("Restock product with non-existent product id", async () => {
   const response = await request(app)
-    .post(`/api/products/${uuidv4()}/restock`)
+    .post(`/api/products/${generateObjectId()}/restock`)
     .send({
       stock: 10,
     });

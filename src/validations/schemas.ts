@@ -15,7 +15,7 @@ const updateProductSchema = Joi.object({
 });
 
 const idSchema = Joi.object({
-  id: Joi.string().guid().required().strict().messages({
+  id: Joi.string().required().strict().messages({
     "string.guid": "Invalid id",
     "any.required": "Id is required",
     "string.base": "Id must be a string",
@@ -52,12 +52,12 @@ const sellProductSchema = Joi.object({
 });
 
 const orderSchema = Joi.object({
-  customerId: Joi.string().required(),
+  customerId: Joi.string().guid().required().strict(),
   products: Joi.array()
     .items(
       Joi.object({
-        productId: Joi.string().guid().required(),
-        quantity: Joi.number().integer().min(1).required(),
+        productId: Joi.string().required().strict(),
+        quantity: Joi.number().integer().min(1).required().strict(),
       })
     )
     .required(),
@@ -88,11 +88,7 @@ export default {
       body: updateProductSchema,
     },
   },
-  "/orders": {
-    post: {
-      body: orderSchema,
-    },
-  },
+
   "/products/:id/restock": {
     post: {
       params: idSchema,
@@ -103,6 +99,12 @@ export default {
     post: {
       params: idSchema,
       body: sellProductSchema,
+    },
+  },
+  "/orders": {
+    post: {
+      params: null,
+      body: orderSchema,
     },
   },
 };

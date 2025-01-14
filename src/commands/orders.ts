@@ -1,6 +1,5 @@
 import { NextFunction, Request, Response } from "express";
 import prisma from "@/db";
-import { v4 as uuidv4 } from "uuid";
 
 export const createOrder = async (
   req: Request,
@@ -11,6 +10,8 @@ export const createOrder = async (
     const { customerId, products } = req.body;
 
     for (const { productId, quantity } of products) {
+      console.log(productId, quantity);
+
       const product = await prisma.product.findUnique({
         where: { id: productId },
       });
@@ -21,6 +22,7 @@ export const createOrder = async (
           message: `Product with ID ${productId} not found`,
           data: null,
         });
+
         return;
       }
 
@@ -36,11 +38,20 @@ export const createOrder = async (
 
     const order = await prisma.order.create({
       data: {
-        id: uuidv4(),
         customerId,
-        products,
+        orderItems: {
+          create: products.map(({ productId, quantity }) => ({
+            productId,
+            quantity,
+          })),
+        },
+      },
+      include: {
+        orderItems: true,
       },
     });
+
+    console.log(order);
 
     for (const { productId, quantity } of products) {
       await prisma.product.update({

@@ -1,9 +1,9 @@
 import request from "supertest";
 import app from "@/app";
-import { findAndDeleteAllProducts } from "@/tests/utils";
+import { findAndDeleteAllTestProducts } from "@/tests/utils";
 
 beforeEach(async () => {
-  await findAndDeleteAllProducts();
+  await findAndDeleteAllTestProducts();
 });
 
 test("Create product successfully", async () => {

@@ -1,5 +1,4 @@
 import { NextFunction, Request, Response } from "express";
-import { v4 as uuidv4 } from "uuid";
 import { generateTimestamps } from "@/utils";
 import { Product } from "@prisma/client";
 import prisma from "@/db";
@@ -11,12 +10,6 @@ export const createProduct = async (
 ): Promise<void> => {
   try {
     const product = req.body;
-
-    const newProduct: Product = {
-      id: uuidv4(),
-      ...product,
-      ...generateTimestamps(),
-    };
 
     const isProductExists = await prisma.product.findFirst({
       where: {
@@ -48,14 +41,19 @@ export const createProduct = async (
       return;
     }
 
-    await prisma.product.create({
+    const newProduct: Product = {
+      ...product,
+      ...generateTimestamps(),
+    };
+
+    const createdProduct = await prisma.product.create({
       data: newProduct,
     });
 
     res.status(201).send({
       status: "success",
       message: "Product created successfully",
-      data: newProduct,
+      data: createdProduct,
     });
   } catch (error) {
     next(error);

@@ -1,10 +1,10 @@
 import request from "supertest";
 import app from "@/app";
-import { findAndDeleteAllProducts } from "@/tests/utils";
-import { v4 as uuidv4 } from "uuid";
+import { findAndDeleteAllTestProducts } from "@/tests/utils";
+import { generateObjectId } from "@/utils";
 
 beforeEach(async () => {
-  await findAndDeleteAllProducts();
+  await findAndDeleteAllTestProducts();
 });
 
 test("Sell product successfully", async () => {
@@ -89,7 +89,7 @@ test("Sell product with insufficient stock", async () => {
 
 test("Sell product with non-existent product id", async () => {
   const response = await request(app)
-    .post(`/api/products/${uuidv4()}/sell`)
+    .post(`/api/products/${generateObjectId()}/sell`)
     .send({
       quantity: 5,
     });

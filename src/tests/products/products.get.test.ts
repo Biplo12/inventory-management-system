@@ -1,10 +1,10 @@
 import request from "supertest";
 import app from "@/app";
-import { findAndDeleteAllProducts } from "@/tests/utils";
-import { v4 as uuidv4 } from "uuid";
+import { findAndDeleteAllTestProducts } from "@/tests/utils";
+import { generateObjectId } from "@/utils";
 
 beforeEach(async () => {
-  await findAndDeleteAllProducts();
+  await findAndDeleteAllTestProducts();
 });
 
 test("Get one product successfully", async () => {
@@ -116,7 +116,9 @@ test("Get product by id successfully", async () => {
 });
 
 test("Get product by id with non existing id", async () => {
-  const response = await request(app).get(`/api/products/${uuidv4()}`);
+  const response = await request(app).get(
+    `/api/products/${generateObjectId()}`
+  );
 
   expect(response.status).toBe(404);
   expect(response.body).toEqual({

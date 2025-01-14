@@ -1,10 +1,10 @@
 import request from "supertest";
 import app from "@/app";
-import { findAndDeleteAllProducts } from "@/tests/utils";
-import { v4 as uuidv4 } from "uuid";
+import { findAndDeleteAllTestProducts } from "@/tests/utils";
+import { generateObjectId } from "@/utils";
 
 beforeEach(async () => {
-  await findAndDeleteAllProducts();
+  await findAndDeleteAllTestProducts();
 });
 
 test("Update product name by id successfully", async () => {
@@ -372,9 +372,11 @@ test("Update product stock by id with no changes to update", async () => {
 });
 
 test("Update product name by id with product that does not exist", async () => {
-  const response = await request(app).put(`/api/products/${uuidv4()}`).send({
-    name: "Updated Product",
-  });
+  const response = await request(app)
+    .put(`/api/products/${generateObjectId()}`)
+    .send({
+      name: "Updated Product",
+    });
 
   expect(response.status).toBe(404);
   expect(response.body).toEqual({
@@ -398,9 +400,11 @@ test("Update product name by id with invalid id", async () => {
 });
 
 test("Update product name by id with empty product name", async () => {
-  const response = await request(app).put(`/api/products/${uuidv4()}`).send({
-    name: "",
-  });
+  const response = await request(app)
+    .put(`/api/products/${generateObjectId()}`)
+    .send({
+      name: "",
+    });
 
   expect(response.status).toBe(422);
   expect(response.body).toEqual({
@@ -411,9 +415,11 @@ test("Update product name by id with empty product name", async () => {
 });
 
 test("Update product name by id with empty product description", async () => {
-  const response = await request(app).put(`/api/products/${uuidv4()}`).send({
-    description: "",
-  });
+  const response = await request(app)
+    .put(`/api/products/${generateObjectId()}`)
+    .send({
+      description: "",
+    });
 
   expect(response.status).toBe(422);
   expect(response.body).toEqual({
@@ -424,9 +430,11 @@ test("Update product name by id with empty product description", async () => {
 });
 
 test("Update product name by id with invalid name type", async () => {
-  const response = await request(app).put(`/api/products/${uuidv4()}`).send({
-    name: 1,
-  });
+  const response = await request(app)
+    .put(`/api/products/${generateObjectId()}`)
+    .send({
+      name: 1,
+    });
 
   expect(response.status).toBe(422);
   expect(response.body).toEqual({
@@ -437,9 +445,11 @@ test("Update product name by id with invalid name type", async () => {
 });
 
 test("Update product name by id with invalid description type", async () => {
-  const response = await request(app).put(`/api/products/${uuidv4()}`).send({
-    description: 1,
-  });
+  const response = await request(app)
+    .put(`/api/products/${generateObjectId()}`)
+    .send({
+      description: 1,
+    });
 
   expect(response.status).toBe(422);
   expect(response.body).toEqual({
@@ -450,9 +460,11 @@ test("Update product name by id with invalid description type", async () => {
 });
 
 test("Update product name by id with invalid price type", async () => {
-  const response = await request(app).put(`/api/products/${uuidv4()}`).send({
-    price: "1",
-  });
+  const response = await request(app)
+    .put(`/api/products/${generateObjectId()}`)
+    .send({
+      price: "1",
+    });
 
   expect(response.status).toBe(422);
   expect(response.body).toEqual({
@@ -463,9 +475,11 @@ test("Update product name by id with invalid price type", async () => {
 });
 
 test("Update product name by id with invalid stock type", async () => {
-  const response = await request(app).put(`/api/products/${uuidv4()}`).send({
-    stock: "1",
-  });
+  const response = await request(app)
+    .put(`/api/products/${generateObjectId()}`)
+    .send({
+      stock: "1",
+    });
 
   expect(response.status).toBe(422);
   expect(response.body).toEqual({
@@ -476,9 +490,11 @@ test("Update product name by id with invalid stock type", async () => {
 });
 
 test("Update product name by id with invalid product price", async () => {
-  const response = await request(app).put(`/api/products/${uuidv4()}`).send({
-    price: -1,
-  });
+  const response = await request(app)
+    .put(`/api/products/${generateObjectId()}`)
+    .send({
+      price: -1,
+    });
 
   expect(response.status).toBe(422);
   expect(response.body).toEqual({
@@ -489,9 +505,11 @@ test("Update product name by id with invalid product price", async () => {
 });
 
 test("Update product name by id with invalid product stock", async () => {
-  const response = await request(app).put(`/api/products/${uuidv4()}`).send({
-    stock: -1,
-  });
+  const response = await request(app)
+    .put(`/api/products/${generateObjectId()}`)
+    .send({
+      stock: -1,
+    });
 
   expect(response.status).toBe(422);
   expect(response.body).toEqual({
@@ -503,7 +521,7 @@ test("Update product name by id with invalid product stock", async () => {
 
 test("Update product name by id with invalid product name length", async () => {
   const response = await request(app)
-    .put(`/api/products/${uuidv4()}`)
+    .put(`/api/products/${generateObjectId()}`)
     .send({
       name: "Test Product".repeat(10),
     });
@@ -518,7 +536,7 @@ test("Update product name by id with invalid product name length", async () => {
 
 test("Update product name by id with crossed description length limit", async () => {
   const response = await request(app)
-    .put(`/api/products/${uuidv4()}`)
+    .put(`/api/products/${generateObjectId()}`)
     .send({
       description: "Test Description".repeat(10),
     });
