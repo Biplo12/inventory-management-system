@@ -11,13 +11,17 @@ const errorHandler = (
   res: Response,
   next: NextFunction
 ): void => {
-  console.error(`Error: ${err.message}`);
-  console.error(`Stack: ${err.stack}`);
+  //   console.error(`Error: ${err.message}`);
+  //   console.error(`Stack: ${err.stack}`);
 
   const statusCode = err.statusCode || 500;
   const message = err.customMessage || "An unexpected error occurred";
 
-  res.status(statusCode).send({ error: message });
+  res.status(statusCode).send({
+    status: "failed",
+    message,
+    data: null,
+  });
 };
 
 export default errorHandler;

@@ -1,16 +1,8 @@
 import { NextFunction, Request, Response } from "express";
 import { v4 as uuidv4 } from "uuid";
 import { generateTimestamps } from "@/utils";
-import { validateProduct } from "@/validations/products";
 import { Product } from "@prisma/client";
 import prisma from "@/db";
-import {
-  createProductSchema,
-  idSchema,
-  stockSchema,
-  updateProductSchema,
-  quantitySchema,
-} from "@/validations/products/schema";
 
 export const createProduct = async (
   req: Request,
@@ -19,16 +11,6 @@ export const createProduct = async (
 ): Promise<void> => {
   try {
     const product = req.body;
-
-    const productValidationError = validateProduct(
-      product,
-      createProductSchema
-    );
-
-    if (productValidationError) {
-      res.status(400).send({ message: productValidationError.message });
-      return;
-    }
 
     const newProduct: Product = {
       id: uuidv4(),
@@ -43,7 +25,11 @@ export const createProduct = async (
     });
 
     if (isProductExists) {
-      res.status(400).send({ message: "Product already exists" });
+      res.status(400).send({
+        status: "failed",
+        message: "Product already exists",
+        data: null,
+      });
       return;
     }
 
@@ -54,7 +40,11 @@ export const createProduct = async (
     });
 
     if (isProductNameExists) {
-      res.status(400).send({ message: "Product name already exists" });
+      res.status(400).send({
+        status: "failed",
+        message: "Product name already exists",
+        data: null,
+      });
       return;
     }
 
@@ -62,9 +52,11 @@ export const createProduct = async (
       data: newProduct,
     });
 
-    res
-      .status(201)
-      .send({ id: newProduct.id, message: "Product created successfully" });
+    res.status(201).send({
+      status: "success",
+      message: "Product created successfully",
+      data: newProduct,
+    });
   } catch (error) {
     next(error);
   }
@@ -78,13 +70,6 @@ export const deleteProduct = async (
   try {
     const { id } = req.params;
 
-    const idValidationError = validateProduct(id, idSchema);
-
-    if (idValidationError) {
-      res.status(400).send({ message: idValidationError.message });
-      return;
-    }
-
     const isProductExists = await prisma.product.findFirst({
       where: {
         id,
@@ -92,7 +77,12 @@ export const deleteProduct = async (
     });
 
     if (!isProductExists) {
-      res.status(404).send({ message: "Product not found" });
+      res.status(404).send({
+        status: "failed",
+        message: "Product not found",
+        data: null,
+      });
+
       return;
     }
 
@@ -102,7 +92,11 @@ export const deleteProduct = async (
       },
     });
 
-    res.status(204).send({ message: "Product deleted successfully" });
+    res.status(200).send({
+      status: "success",
+      message: "Product deleted successfully",
+      data: null,
+    });
   } catch (error) {
     next(error);
   }
@@ -115,25 +109,7 @@ export const updateProduct = async (
 ): Promise<void> => {
   try {
     const { id } = req.params;
-
-    const idValidationError = validateProduct(id, idSchema);
-
-    if (idValidationError) {
-      res.status(400).send({ message: idValidationError.message });
-      return;
-    }
-
     const product = req.body;
-
-    const productValidationError = validateProduct(
-      product,
-      updateProductSchema
-    );
-
-    if (productValidationError) {
-      res.status(400).send({ message: productValidationError.message });
-      return;
-    }
 
     const isProductExists = await prisma.product.findFirst({
       where: {
@@ -142,7 +118,11 @@ export const updateProduct = async (
     });
 
     if (!isProductExists) {
-      res.status(404).send({ message: "Product not found" });
+      res.status(404).send({
+        status: "failed",
+        message: "Product not found",
+        data: null,
+      });
       return;
     }
 
@@ -154,7 +134,11 @@ export const updateProduct = async (
       });
 
       if (isProductNameExists) {
-        res.status(400).send({ message: "Product name already exists" });
+        res.status(400).send({
+          status: "failed",
+          message: "Product name already exists",
+          data: null,
+        });
         return;
       }
     }
@@ -164,11 +148,16 @@ export const updateProduct = async (
     );
 
     if (isUpdatedValuesSame) {
-      res.status(400).send({ message: "No changes to update" });
+      res.status(400).send({
+        status: "failed",
+        message: "No changes to update",
+        data: null,
+      });
+
       return;
     }
 
-    await prisma.product.update({
+    const updatedProduct = await prisma.product.update({
       where: {
         id,
       },
@@ -178,7 +167,11 @@ export const updateProduct = async (
       },
     });
 
-    res.status(200).send({ message: "Product updated successfully" });
+    res.status(200).send({
+      status: "success",
+      message: "Product updated successfully",
+      data: updatedProduct,
+    });
   } catch (error) {
     next(error);
   }
@@ -193,30 +186,20 @@ export const restockProduct = async (
     const { id } = req.params;
     const { stock } = req.body;
 
-    const idValidationError = validateProduct(id, idSchema);
-
-    if (idValidationError) {
-      res.status(400).send({ message: idValidationError.message });
-      return;
-    }
-
-    const stockValidationError = validateProduct(stock, stockSchema);
-
-    if (stockValidationError) {
-      res.status(400).send({ message: stockValidationError.message });
-      return;
-    }
-
     const product = await prisma.product.findUnique({
       where: { id },
     });
 
     if (!product) {
-      res.status(404).send({ message: "Product not found" });
+      res.status(404).send({
+        status: "failed",
+        message: "Product not found",
+        data: null,
+      });
       return;
     }
 
-    const updatedProduct = await prisma.product.update({
+    const restockedProduct = await prisma.product.update({
       where: { id },
       data: {
         stock: product.stock + stock,
@@ -225,8 +208,9 @@ export const restockProduct = async (
     });
 
     res.status(200).send({
+      status: "success",
       message: "Product restocked successfully",
-      stock: updatedProduct.stock,
+      data: restockedProduct,
     });
   } catch (error) {
     next(error);
@@ -242,33 +226,29 @@ export const sellProduct = async (
     const { id } = req.params;
     const { quantity } = req.body;
 
-    const idValidationError = validateProduct(id, idSchema);
-    if (idValidationError) {
-      res.status(400).send({ message: idValidationError.message });
-      return;
-    }
-
-    const quantityValidationError = validateProduct(quantity, quantitySchema);
-    if (quantityValidationError) {
-      res.status(400).send({ message: quantityValidationError.message });
-      return;
-    }
-
     const product = await prisma.product.findUnique({
       where: { id },
     });
 
     if (!product) {
-      res.status(404).send({ message: "Product not found" });
+      res.status(404).send({
+        status: "failed",
+        message: "Product not found",
+        data: null,
+      });
       return;
     }
 
     if (product.stock < quantity) {
-      res.status(400).send({ message: "Insufficient stock" });
+      res.status(400).send({
+        status: "failed",
+        message: "Insufficient stock",
+        data: null,
+      });
       return;
     }
 
-    const updatedProduct = await prisma.product.update({
+    const soldProduct = await prisma.product.update({
       where: { id },
       data: {
         stock: product.stock - quantity,
@@ -277,8 +257,9 @@ export const sellProduct = async (
     });
 
     res.status(200).send({
+      status: "success",
       message: "Product sold successfully",
-      stock: updatedProduct.stock,
+      data: soldProduct,
     });
   } catch (error) {
     next(error);

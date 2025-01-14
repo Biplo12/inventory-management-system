@@ -1,6 +1,4 @@
 import prisma from "@/db";
-import { validateProduct } from "@/validations/products";
-import { idSchema } from "@/validations/products/schema";
 import { NextFunction, Request, Response } from "express";
 
 export const getProducts = async (
@@ -11,7 +9,11 @@ export const getProducts = async (
   try {
     const products = await prisma.product.findMany();
 
-    res.status(200).send(products);
+    res.status(200).send({
+      status: "success",
+      message: "Products fetched successfully",
+      data: products,
+    });
   } catch (error) {
     next(error);
   }
@@ -25,21 +27,22 @@ export const getProductById = async (
   try {
     const { id } = req.params;
 
-    const idValidationError = validateProduct(id, idSchema);
-
-    if (idValidationError) {
-      res.status(400).send({ message: idValidationError.message });
-      return;
-    }
-
     const product = await prisma.product.findUnique({ where: { id } });
 
     if (!product) {
-      res.status(404).send({ message: "Product not found" });
+      res.status(404).send({
+        status: "failed",
+        message: "Product not found",
+        data: null,
+      });
       return;
     }
 
-    res.status(200).send(product);
+    res.status(200).send({
+      status: "success",
+      message: "Product fetched successfully",
+      data: product,
+    });
   } catch (error) {
     next(error);
   }

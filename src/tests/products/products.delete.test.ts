@@ -14,13 +14,17 @@ test("Delete product successfully", async () => {
     stock: 10,
   });
 
+  const createdProductId = createdProduct.body.data.id;
+
   const response = await request(app)
-    .delete(`/api/products/${createdProduct.body.id}`)
+    .delete(`/api/products/${createdProductId}`)
     .send();
 
   expect(response.status).toBe(200);
   expect(response.body).toEqual({
+    status: "success",
     message: "Product deleted successfully",
+    data: null,
   });
 });
 
@@ -29,15 +33,19 @@ test("Delete product that does not exist", async () => {
 
   expect(response.status).toBe(404);
   expect(response.body).toEqual({
+    status: "failed",
     message: "Product not found",
+    data: null,
   });
 });
 
 test("Delete product with invalid id", async () => {
   const response = await request(app).delete("/api/products/invalid-id");
 
-  expect(response.status).toBe(400);
+  expect(response.status).toBe(422);
   expect(response.body).toEqual({
+    status: "failed",
     message: "Invalid id",
+    data: null,
   });
 });

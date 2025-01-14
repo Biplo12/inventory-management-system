@@ -15,20 +15,31 @@ test("Sell product successfully", async () => {
     stock: 10,
   });
 
+  const createdProductId = createdProduct.body.data.id;
+
   const response = await request(app)
-    .post(`/api/products/${createdProduct.body.id}/sell`)
+    .post(`/api/products/${createdProductId}/sell`)
     .send({ quantity: 5 });
 
   const soldProduct = await request(app).get(
-    `/api/products/${createdProduct.body.id}`
+    `/api/products/${createdProductId}`
   );
 
-  expect(soldProduct.body.stock).toBe(5);
+  expect(soldProduct.body.data.stock).toBe(5);
 
   expect(response.status).toBe(200);
   expect(response.body).toEqual({
+    status: "success",
     message: "Product sold successfully",
-    stock: 5,
+    data: {
+      id: createdProductId,
+      name: "Test Product",
+      description: "Test Description",
+      price: 100,
+      stock: 5,
+      createdAt: expect.any(String),
+      updatedAt: expect.any(String),
+    },
   });
 });
 
@@ -40,13 +51,17 @@ test("Sell product with invalid quantity", async () => {
     stock: 10,
   });
 
+  const createdProductId = createdProduct.body.data.id;
+
   const response = await request(app)
-    .post(`/api/products/${createdProduct.body.id}/sell`)
+    .post(`/api/products/${createdProductId}/sell`)
     .send({ quantity: -5 });
 
-  expect(response.status).toBe(400);
+  expect(response.status).toBe(422);
   expect(response.body).toEqual({
+    status: "failed",
     message: "Quantity must be greater than or equal to 0",
+    data: null,
   });
 });
 
@@ -58,13 +73,17 @@ test("Sell product with insufficient stock", async () => {
     stock: 10,
   });
 
+  const createdProductId = createdProduct.body.data.id;
+
   const response = await request(app)
-    .post(`/api/products/${createdProduct.body.id}/sell`)
+    .post(`/api/products/${createdProductId}/sell`)
     .send({ quantity: 15 });
 
   expect(response.status).toBe(400);
   expect(response.body).toEqual({
+    status: "failed",
     message: "Insufficient stock",
+    data: null,
   });
 });
 
@@ -77,7 +96,9 @@ test("Sell product with non-existent product id", async () => {
 
   expect(response.status).toBe(404);
   expect(response.body).toEqual({
+    status: "failed",
     message: "Product not found",
+    data: null,
   });
 });
 
@@ -88,9 +109,11 @@ test("Sell product with invalid id", async () => {
       quantity: 5,
     });
 
-  expect(response.status).toBe(400);
+  expect(response.status).toBe(422);
   expect(response.body).toEqual({
+    status: "failed",
     message: "Invalid id",
+    data: null,
   });
 });
 
@@ -102,31 +125,17 @@ test("Sell product with invalid product stock type", async () => {
     stock: 10,
   });
 
+  const createdProductId = createdProduct.body.data.id;
+
   const response = await request(app)
-    .post(`/api/products/${createdProduct.body.id}/sell`)
+    .post(`/api/products/${createdProductId}/sell`)
     .send({ quantity: "5" });
 
-  expect(response.status).toBe(400);
+  expect(response.status).toBe(422);
   expect(response.body).toEqual({
+    status: "failed",
     message: "Quantity must be a number",
-  });
-});
-
-test("Sell product without stock", async () => {
-  const createdProduct = await request(app).post("/api/products").send({
-    name: "Test Product",
-    description: "Test Description",
-    price: 100,
-    stock: 0,
-  });
-
-  const response = await request(app)
-    .post(`/api/products/${createdProduct.body.id}/sell`)
-    .send({ quantity: 5 });
-
-  expect(response.status).toBe(400);
-  expect(response.body).toEqual({
-    message: "Insufficient stock",
+    data: null,
   });
 });
 
@@ -138,13 +147,17 @@ test("Sell product without quantity", async () => {
     stock: 10,
   });
 
+  const createdProductId = createdProduct.body.data.id;
+
   const response = await request(app)
-    .post(`/api/products/${createdProduct.body.id}/sell`)
+    .post(`/api/products/${createdProductId}/sell`)
     .send({});
 
-  expect(response.status).toBe(400);
+  expect(response.status).toBe(422);
   expect(response.body).toEqual({
+    status: "failed",
     message: "Quantity is required",
+    data: null,
   });
 });
 
@@ -156,12 +169,16 @@ test("Sell product with decimal quantity", async () => {
     stock: 10,
   });
 
+  const createdProductId = createdProduct.body.data.id;
+
   const response = await request(app)
-    .post(`/api/products/${createdProduct.body.id}/sell`)
+    .post(`/api/products/${createdProductId}/sell`)
     .send({ quantity: 5.5 });
 
-  expect(response.status).toBe(400);
+  expect(response.status).toBe(422);
   expect(response.body).toEqual({
+    status: "failed",
     message: "Quantity must be an integer",
+    data: null,
   });
 });
