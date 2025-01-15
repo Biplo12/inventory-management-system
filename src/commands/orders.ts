@@ -10,8 +10,6 @@ export const createOrder = async (
     const { customerId, products } = req.body;
 
     for (const { productId, quantity } of products) {
-      console.log(productId, quantity);
-
       const product = await prisma.product.findUnique({
         where: { id: productId },
       });
@@ -50,8 +48,6 @@ export const createOrder = async (
         orderItems: true,
       },
     });
-
-    console.log(order);
 
     for (const { productId, quantity } of products) {
       await prisma.product.update({

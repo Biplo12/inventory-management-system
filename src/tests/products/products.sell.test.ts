@@ -7,6 +7,10 @@ beforeEach(async () => {
   await findAndDeleteAllTestProducts();
 });
 
+afterAll(async () => {
+  await findAndDeleteAllTestProducts();
+});
+
 test("Sell product successfully", async () => {
   const createdProduct = await request(app).post("/api/products").send({
     name: "Test Product",

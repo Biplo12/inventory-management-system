@@ -1,4 +1,13 @@
 import Joi from "joi";
+import { isValidObjectId } from "mongoose";
+
+const checkIsValidObjectId = (value: string, helper: Joi.CustomHelpers) => {
+  if (!isValidObjectId(value)) {
+    return helper.error("string.objectId");
+  }
+
+  return value;
+};
 
 const createProductSchema = Joi.object({
   name: Joi.string().required().max(50).strict(),
@@ -15,8 +24,8 @@ const updateProductSchema = Joi.object({
 });
 
 const idSchema = Joi.object({
-  id: Joi.string().required().strict().messages({
-    "string.guid": "Invalid id",
+  id: Joi.string().custom(checkIsValidObjectId).required().strict().messages({
+    "string.objectId": "Invalid id",
     "any.required": "Id is required",
     "string.base": "Id must be a string",
     "string.empty": "Id is required",
@@ -52,15 +61,37 @@ const sellProductSchema = Joi.object({
 });
 
 const orderSchema = Joi.object({
-  customerId: Joi.string().guid().required().strict(),
+  customerId: Joi.string()
+    .custom(checkIsValidObjectId)
+    .required()
+    .strict()
+    .messages({
+      "string.objectId": "Invalid id",
+      "any.required": "Id is required",
+      "string.base": "Id must be a string",
+      "string.empty": "Id is required",
+    }),
   products: Joi.array()
     .items(
       Joi.object({
-        productId: Joi.string().required().strict(),
+        productId: Joi.string()
+          .custom(checkIsValidObjectId)
+          .required()
+          .strict()
+          .messages({
+            "string.objectId": "Invalid id",
+            "any.required": "Id is required",
+            "string.base": "Id must be a string",
+            "string.empty": "Id is required",
+          }),
         quantity: Joi.number().integer().min(1).required().strict(),
       })
     )
-    .required(),
+    .required()
+    .messages({
+      "array.base": "Products must be an array",
+      "array.empty": "Products must not be empty",
+    }),
 });
 
 export default {
