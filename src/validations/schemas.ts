@@ -67,9 +67,9 @@ const orderSchema = Joi.object({
     .strict()
     .messages({
       "string.objectId": "Invalid id",
-      "any.required": "Id is required",
+      "any.required": "Customer id is required",
       "string.base": "Id must be a string",
-      "string.empty": "Id is required",
+      "string.empty": "Customer id is required",
     }),
   products: Joi.array()
     .items(
@@ -80,13 +80,19 @@ const orderSchema = Joi.object({
           .strict()
           .messages({
             "string.objectId": "Invalid id",
-            "any.required": "Id is required",
+            "any.required": "Product id is required",
             "string.base": "Id must be a string",
-            "string.empty": "Id is required",
+            "string.empty": "Product id is required",
           }),
-        quantity: Joi.number().integer().min(1).required().strict(),
+        quantity: Joi.number().integer().min(1).required().strict().messages({
+          "number.base": "Quantity must be a number",
+          "number.integer": "Quantity must be an integer",
+          "number.min": "Quantity must be greater than or equal to 1",
+          "any.required": "Quantity is required",
+        }),
       })
     )
+    .min(1)
     .required()
     .messages({
       "array.base": "Products must be an array",

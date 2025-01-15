@@ -11,21 +11,6 @@ export const createProduct = async (
   try {
     const product = req.body;
 
-    const isProductExists = await prisma.product.findFirst({
-      where: {
-        name: product.name,
-      },
-    });
-
-    if (isProductExists) {
-      res.status(400).send({
-        status: "failed",
-        message: "Product already exists",
-        data: null,
-      });
-      return;
-    }
-
     const isProductNameExists = await prisma.product.findFirst({
       where: {
         name: product.name,
@@ -35,7 +20,7 @@ export const createProduct = async (
     if (isProductNameExists) {
       res.status(400).send({
         status: "failed",
-        message: "Product name already exists",
+        message: "Product already exists",
         data: null,
       });
       return;
