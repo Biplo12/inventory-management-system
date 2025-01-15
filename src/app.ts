@@ -4,6 +4,7 @@ import bodyParser from "body-parser";
 import productsRouter from "@/routes/products";
 import errorHandler from "./middleware/errorHandler";
 import ordersRouter from "@/routes/orders";
+import notFoundHandler from "./middleware/notFoundHandler";
 
 dotenv.config();
 
@@ -16,6 +17,8 @@ app.use(bodyParser.json());
 app.use(`${PREFIX}/products`, productsRouter);
 
 app.use(`${PREFIX}/orders`, ordersRouter);
+
+app.use(notFoundHandler);
 
 app.use(errorHandler);
 
